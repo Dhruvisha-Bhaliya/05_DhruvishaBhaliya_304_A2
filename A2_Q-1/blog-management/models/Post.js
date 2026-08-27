@@ -4,29 +4,42 @@ const postSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      required: [true, "Title is required"],
       trim: true,
+      minlength: 3,
+      maxlength: 200,
     },
+
     content: {
       type: String,
-      required: true,
+      required: [true, "Content is required"],
+      trim: true,
     },
-    tags: [{ type: String, trim: true }],
+
+    tags: {
+      type: [String],
+      default: [],
+    },
+
     published: {
       type: Boolean,
       default: false,
     },
-    featuredImage: {
+
+    image: {
       type: String,
-      default: "",
+      default: null,
     },
+
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
 
 module.exports = mongoose.model("Post", postSchema);

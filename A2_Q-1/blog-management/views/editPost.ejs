@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Post - Blog Management</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="page-header">
+            <div>
+                <h1>Edit Blog Post</h1>
+                <p>Update your blog post details.</p>
+            </div>
+
+            <a href="/dashboard" class="btn">
+                Back to Dashboard
+            </a>
+        </div>
+
+
+        <form id="editPostForm" enctype="multipart/form-data">
+
+            <!-- Title -->
+            <div class="form-group">
+                <label>Title</label>
+
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="<%= post.title %>"
+                    required
+                >
+            </div>
+
+
+            <!-- Content -->
+            <div class="form-group">
+                <label>Content</label>
+
+                <textarea
+                    id="content"
+                    name="content"
+                    rows="8"
+                    required
+                ><%= post.content %></textarea>
+            </div>
+
+
+            <!-- Tags -->
+            <div class="form-group">
+                <label>Tags</label>
+
+                <input
+                    type="text"
+                    id="tags"
+                    name="tags"
+                    value="<%= post.tags.join(', ') %>"
+                    placeholder="Node.js, Express, MongoDB"
+                >
+
+                <small>
+                    Separate tags using commas.
+                </small>
+            </div>
+
+
+            <!-- Published -->
+            <div class="form-group">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        id="published"
+                        name="published"
+                        <%= post.published ? "checked" : "" %>
+                    >
+
+                    Publish this post
+                </label>
+
+            </div>
+
+
+            <!-- Current Image -->
+            <div class="form-group">
+
+                <label>Current Featured Image</label>
+
+                <% if (post.image) { %>
+
+                    <div class="image-preview-container">
+
+                        <img
+                            id="currentImage"
+                            src="<%= post.image %>"
+                            alt="Current Post Image"
+                            style="
+                                width: 300px;
+                                max-width: 100%;
+                                margin-top: 10px;
+                                border-radius: 8px;
+                            "
+                        >
+
+                    </div>
+
+                <% } else { %>
+
+                    <p id="noImage">
+                        No image uploaded for this post.
+                    </p>
+
+                    <img
+                        id="currentImage"
+                        src=""
+                        alt="Image Preview"
+                        style="
+                            display: none;
+                            width: 300px;
+                            max-width: 100%;
+                            margin-top: 10px;
+                            border-radius: 8px;
+                        "
+                    >
+
+                <% } %>
+
+            </div>
+
+
+            <!-- Replace Image -->
+            <div class="form-group">
+
+                <label>Replace Featured Image</label>
+
+                <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <small>
+                    Leave empty if you want to keep the current image.
+                </small>
+
+            </div>
+
+
+            <button type="submit" class="btn">
+                Update Post
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <script>
+
+        const form = document.getElementById("editPostForm");
+        const imageInput = document.getElementById("image");
+        const currentImage = document.getElementById("currentImage");
+
+
+        // =====================================
+        // Preview newly selected image
+        // =====================================
+        imageInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (file) {
+
+                currentImage.src = URL.createObjectURL(file);
+
+                currentImage.style.display = "block";
+
+                const noImage =
+                    document.getElementById("noImage");
+
+                if (noImage) {
+                    noImage.style.display = "none";
+                }
+
+            }
+
+        });
+
+
+        // =====================================
+        // Update Post
+        // =====================================
+        form.addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            const formData = new FormData();
+
+            formData.append(
+                "title",
+                document.getElementById("title").value
+            );
+
+            formData.append(
+                "content",
+                document.getElementById("content").value
+            );
+
+            formData.append(
+                "tags",
+                document.getElementById("tags").value
+            );
+
+            formData.append(
+                "published",
+                document.getElementById("published").checked
+            );
+
+
+            // Add new image only if user selected one
+            if (imageInput.files.length > 0) {
+
+                formData.append(
+                    "image",
+                    imageInput.files[0]
+                );
+
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    "/api/posts/<%= post._id %>",
+                    {
+                        method: "PUT",
+
+                        body: formData
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (data.success) {
+
+                    alert("Post updated successfully!");
+
+                    window.location.href = "/dashboard";
+
+                } else {
+
+                    alert(
+                        data.message ||
+                        "Could not update post"
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Something went wrong while updating the post."
+                );
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
