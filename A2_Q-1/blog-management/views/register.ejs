@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account - Blog Management</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <h1>Create Account</h1>
+        <p class="subtitle">Register to create and manage your blog posts.</p>
+
+        <!-- Set enctype to multipart/form-data for file upload -->
+        <form action="/register" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="name@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Create a password"
+              required
+            />
+          </div>
+
+          <!-- Profile Picture Upload Input -->
+          <div class="form-group">
+            <label for="profilePicture">Profile Picture (Optional)</label>
+            <input
+              type="file"
+              id="profilePicture"
+              name="profilePicture"
+              accept="image/jpeg,image/png,image/webp"
+            />
+          </div>
+
+          <button type="submit" class="btn">Register</button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Already have an account? <a href="/login">Login</a></p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

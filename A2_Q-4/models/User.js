@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,15 +21,10 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    profilePicture: {
-      type: String,
-      default: null,
-    },
-
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ["customer", "admin"],
+      default: "customer",
     },
   },
   {
@@ -38,9 +32,6 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// Compare entered password with hashed password
-userSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
+const User = mongoose.model("User", userSchema);
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = User;

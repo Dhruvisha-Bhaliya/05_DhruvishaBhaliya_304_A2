@@ -1,217 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard - Blog Management</title>
-
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Blog Management</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
 
-    <div class="container">
-
-        <div class="page-header">
-
-            <div>
-                <h1>My Dashboard</h1>
-
-                <p>
-                    Welcome,
-                    <strong><%= user.name %></strong>
-                </p>
-            </div>
-
-            <div>
-                <a href="/posts" class="btn">
-                    View Published Posts
-                </a>
-            </div>
-
-        </div>
-
-
-        <h2>My Blog Posts</h2>
-
-
-        <% if (posts.length === 0) { %>
-
-            <div class="empty-message">
-
-                <p>
-                    You have not created any blog posts yet.
-                </p>
-
-            </div>
-
+  <div class="container">
+    <!-- Header Section -->
+    <header class="page-header">
+      <div class="user-profile-info" style="display: flex; align-items: center; gap: 14px;">
+        <% if (user && user.profilePicture) { %>
+          <img src="<%= user.profilePicture %>" alt="<%= user.name %>" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
         <% } else { %>
-
-            <div class="posts-grid">
-
-                <% posts.forEach(post => { %>
-
-                    <div class="post-card">
-
-                        <!-- Post Image -->
-                        <% if (post.image) { %>
-
-                            <img
-                                src="<%= post.image %>"
-                                alt="<%= post.title %>"
-                                class="post-image"
-                            >
-
-                        <% } %>
-
-
-                        <div class="post-content">
-
-                            <!-- Title -->
-                            <h2>
-                                <%= post.title %>
-                            </h2>
-
-
-                            <!-- Status -->
-                            <p>
-
-                                Status:
-
-                                <% if (post.published) { %>
-
-                                    <strong>Published</strong>
-
-                                <% } else { %>
-
-                                    <strong>Draft</strong>
-
-                                <% } %>
-
-                            </p>
-
-
-                            <!-- Content -->
-                            <p>
-                                <%= post.content %>
-                            </p>
-
-
-                            <!-- Tags -->
-                            <% if (post.tags && post.tags.length > 0) { %>
-
-                                <div class="tags">
-
-                                    <% post.tags.forEach(tag => { %>
-
-                                        <span class="tag">
-                                            <%= tag %>
-                                        </span>
-
-                                    <% }) %>
-
-                                </div>
-
-                            <% } %>
-
-
-                            <!-- Date -->
-                            <p class="post-date">
-
-                                Created:
-
-                                <%= new Date(post.createdAt).toLocaleDateString() %>
-
-                            </p>
-
-
-                            <!-- Actions -->
-                            <div class="post-actions">
-
-                                <button
-                                    class="btn edit-btn"
-                                    onclick="editPost('<%= post._id %>')"
-                                >
-                                    Edit
-                                </button>
-
-
-                                <button
-                                    class="btn delete-btn"
-                                    onclick="deletePost('<%= post._id %>')"
-                                >
-                                    Delete
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                <% }) %>
-
-            </div>
-
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: #e0e7ff; color: #3730a3; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem;">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+          </div>
         <% } %>
+        <div>
+          <h1>Dashboard</h1>
+          <p>Welcome back, <strong><%= user ? user.name : 'User' %></strong></p>
+        </div>
+      </div>
 
+      <div class="header-actions">
+        <a href="/posts/new" class="btn">+ Create Post</a>
+        <a href="/posts" class="btn btn-secondary">View All Posts</a>
+<a href="/logout" class="btn btn-secondary" style="color: #dc2626; border-color: #fecaca;">Logout</a>      </div>
+    </header>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h2 style="font-size: 1.35rem; color: #0f172a; font-weight: 700;">My Blog Posts</h2>
+      <span style="font-size: 0.9rem; color: #64748b;">Total Posts: <%= posts ? posts.length : 0 %></span>
     </div>
 
+    <!-- Posts Listing -->
+    <% if (posts && posts.length > 0) { %>
+      <% posts.forEach(post => { %>
+        <article class="post-card">
+          <% if (post.image) { %>
+            <div class="post-card-image-container">
+              <img src="<%= post.image %>" alt="<%= post.title %>" class="post-card-image">
+            </div>
+          <% } %>
 
-    <script>
+          <div class="post-card-content">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+              <h2 class="post-card-title" style="margin-bottom: 0;"><%= post.title %></h2>
+              <span class="tag-badge <%= post.published ? 'status-published' : 'status-draft' %>">
+                <%= post.published ? 'Published' : 'Draft' %>
+              </span>
+            </div>
 
-        // Delete Post
-        async function deletePost(id) {
+            <p class="post-card-body"><%= post.content %></p>
 
-            const confirmDelete = confirm(
-                "Are you sure you want to delete this post?"
-            );
+            <% if (post.tags && post.tags.length > 0) { %>
+              <div class="tags-container">
+                <% post.tags.forEach(tag => { %>
+                  <span class="tag-badge"><%= tag %></span>
+                <% }); %>
+              </div>
+            <% } %>
 
-            if (!confirmDelete) {
-                return;
-            }
+            <p class="post-card-date" style="margin-bottom: 20px;">
+              Created on <%= new Date(post.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) %>
+            </p>
 
-            try {
+            <!-- Actions Bar -->
+            <div style="display: flex; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+              <a href="/posts/<%= post._id %>/edit" class="btn btn-secondary" style="padding: 8px 18px;">Edit</a>
+              <button onclick="deletePost('<%= post._id %>')" class="btn" style="background-color: #dc2626; padding: 8px 18px;">Delete</button>
+            </div>
+          </div>
+        </article>
+      <% }); %>
+    <% } else { %>
+      <div class="post-card" style="padding: 48px; text-align: center;">
+        <h3 style="color: #475569; margin-bottom: 8px;">No blog posts found</h3>
+        <p style="color: #94a3b8; margin-bottom: 20px;">You haven't written any posts yet. Start by creating your first post!</p>
+        <a href="/posts/new" class="btn">+ Create New Post</a>
+      </div>
+    <% } %>
+  </div>
 
-                const response = await fetch(
-                    "/api/posts/" + id,
-                    {
-                        method: "DELETE"
-                    }
-                );
+  <script>
+    async function deletePost(postId) {
+      if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+        return;
+      }
 
-                const data = await response.json();
+      try {
+        const response = await fetch(`/api/posts/${postId}`, {
+          method: "DELETE",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
 
-                if (data.success) {
-
-                    alert("Post deleted successfully.");
-
-                    window.location.reload();
-
-                } else {
-
-                    alert(data.message);
-
-                }
-
-            } catch (error) {
-
-                alert("Could not delete the post.");
-
-            }
-
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert(data.message || "Failed to delete post.");
         }
-
-
-        // Edit Post
-       function editPost(id) {
-    window.location.href = "/posts/" + id + "/edit";
-}
-
-    </script>
-
+      } catch (error) {
+        console.error("Delete Error:", error);
+        alert("An error occurred while deleting the post.");
+      }
+    }
+  </script>
 </body>
-
 </html>

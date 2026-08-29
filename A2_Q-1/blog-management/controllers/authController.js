@@ -192,9 +192,91 @@ const browserLogin = async (req, res) => {
   }
 };
 
+const uploadProfilePicture = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload a profile picture",
+      });
+    }
+    user.profilePicture = `/uploads/${req.file.filename}`;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded successfully",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const browserRegister = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).render("register", {
+        error: "Name, email and password are required",
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(409).render("register", {
+        error: "User already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Capture uploaded profile picture path from Multer
+    let profilePicPath = null;
+    if (req.file) {
+      profilePicPath = `/uploads/${req.file.filename}`;
+    }
+
+    await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      profilePicture: profilePicPath,
+    });
+
+    return res.redirect("/login");
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).render("register", {
+      error: "Something went wrong",
+    });
+  }
+};
+
 module.exports = {
   register,
   loginUser,
   getProfile,
   browserLogin,
+  uploadProfilePicture,
+  browserRegister,
 };

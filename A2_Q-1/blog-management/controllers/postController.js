@@ -88,72 +88,48 @@ const getPostById = async (req, res, next) => {
 // Update post
 const updatePost = async (req, res, next) => {
   try {
-    const post = await Post.findById(req.params.id);
+    let post = await Post.findById(req.params.id);
 
     if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: "Post not found",
-      });
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
 
-    // Check ownership
+    // Server-side authorization check
     if (
       post.author.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
     ) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to update this post",
-      });
+      return res
+        .status(403)
+        .json({ success: false, message: "Not authorized to edit this post" });
     }
 
-    // Important: prevent req.body undefined error
-    const { title, content, tags, published } = req.body || {};
-
-    // Update text fields
-    if (title !== undefined) {
-      post.title = title;
-    }
-
-    if (content !== undefined) {
-      post.content = content;
-    }
-
-    // Handle tags
-    if (tags !== undefined) {
-      if (Array.isArray(tags)) {
-        post.tags = tags;
-      } else if (typeof tags === "string") {
-        post.tags = tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter((tag) => tag);
-      }
-    }
-
-    // Handle published checkbox
-    post.published =
-      published === "on" || published === true || published === "true";
-
-    // If a new image is uploaded
+    // Process uploaded file path if replaced
+    let imagePath = post.image;
     if (req.file) {
-      post.image = `/uploads/${req.file.filename}`;
+      imagePath = `/uploads/${req.file.filename}`;
     }
 
-    await post.save();
+    const { title, content, tags, published } = req.body;
 
-    // Browser / EJS request
-    if (req.accepts("html")) {
-      return res.redirect("/dashboard");
-    }
+    post = await Post.findByIdAndUpdate(
+      req.params.id,
+      {
+        title,
+        content,
+        tags:
+          typeof tags === "string"
+            ? tags.split(",").map((t) => t.trim())
+            : tags,
+        published: published === "true" || published === true,
+        image: imagePath,
+      },
+      { new: true, runValidators: true },
+    );
 
-    // API / Postman request
-    res.status(200).json({
-      success: true,
-      message: "Post updated successfully",
-      data: post,
-    });
+    res.json({ success: true, post });
   } catch (error) {
     next(error);
   }

@@ -1,87 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Blog Management</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h1>Login</h1>
+      <p class="subtitle">Login to access your personal blog dashboard.</p>
 
-    <title>Login - Blog Management</title>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div style="background-color: #fee2e2; color: #dc2626; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem;">
+          <%= error %>
+        </div>
+      <% } %>
 
-    <link rel="stylesheet" href="/css/style.css" />
-  </head>
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" name="email" placeholder="name@example.com" required>
+        </div>
 
-  <body>
-    <div class="login-container">
-      <div class="login-card">
-        <h1>Login</h1>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter password" required>
+        </div>
 
-        <p class="login-text">Login to access your blog dashboard.</p>
+        <button type="submit" class="btn">Login</button>
+      </form>
 
-        <form action="/login" method="POST">
-          <input type="email" name="email" placeholder="Enter email" required />
-
-          <br /><br />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter password"
-            required
-          />
-
-          <br /><br />
-
-          <button type="submit">Login</button>
-        </form>
-
-        <p id="message" class="form-message"></p>
-
-        <a href="/posts" class="back-link"> ← View Published Posts </a>
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="/register">Register</a></p>
+        <p style="margin-top: 8px;"><a href="/posts" style="color: #64748b;">← View Published Posts</a></p>
       </div>
     </div>
+  </div>
 
-    <script>
-      const loginForm = document.getElementById("loginForm");
-
-      const message = document.getElementById("message");
-
-      loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const email = document.getElementById("email").value;
-
-        const password = document.getElementById("password").value;
-
-        try {
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify({
-              email,
-              password,
-            }),
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            // Store JWT token in browser
-            localStorage.setItem("token", data.token);
-
-            message.textContent = "Login successful. Redirecting...";
-
-            window.location.href = "/dashboard";
-          } else {
-            message.textContent = data.message;
-          }
-        } catch (error) {
-          message.textContent = "Something went wrong. Please try again.";
-        }
-      });
-    </script>
-  </body>
+</body>
 </html>

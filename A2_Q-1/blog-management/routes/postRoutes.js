@@ -22,8 +22,8 @@ router.get("/", protect, getPosts);
 // Get single post
 router.get("/:id", protect, getPostById);
 
-// Update post
-router.put("/:id", protect, updatePost);
+// Update post - Ensure this PUT route is exported and mounted
+router.put("/:id", protect, upload.single("image"), updatePost);
 
 // Delete post
 router.delete("/:id", protect, deletePost);
